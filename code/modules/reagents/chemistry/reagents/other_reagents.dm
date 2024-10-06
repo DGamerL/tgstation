@@ -117,13 +117,13 @@
 	var/obj/effect/decal/cleanable/blood/bloodsplatter = locate() in exposed_turf //find some blood here
 	if(!bloodsplatter)
 		bloodsplatter = new(exposed_turf, data["viruses"])
-	else if(LAZYLEN(data["viruses"]))
-		var/list/viri_to_add = list()
+	if(LAZYLEN(data["viruses"]))
+		var/list/viruses_to_add = list()
 		for(var/datum/disease/virus in data["viruses"])
 			if(virus.spread_flags & DISEASE_SPREAD_CONTACT_FLUIDS)
-				viri_to_add += virus
-		if(LAZYLEN(viri_to_add))
-			bloodsplatter.AddComponent(/datum/component/infective, viri_to_add)
+				viruses_to_add += virus
+		if(LAZYLEN(viruses_to_add))
+			bloodsplatter.AddComponent(/datum/component/infective, viruses_to_add)
 	if(data["blood_DNA"])
 		bloodsplatter.add_blood_DNA(list(data["blood_DNA"] = data["blood_type"]))
 
@@ -587,6 +587,7 @@
 	fallback_icon = 'icons/obj/drinks/drink_effects.dmi'
 	fallback_icon_state = "spraytan_fallback"
 	chemical_flags = REAGENT_CAN_BE_SYNTHESIZED
+	glass_price = DRINK_PRICE_HIGH
 
 /datum/reagent/spraytan/expose_mob(mob/living/exposed_mob, methods=TOUCH, reac_volume, show_message = TRUE)
 	. = ..()
@@ -928,7 +929,7 @@
 	reagent_state = GAS
 	color = COLOR_GRAY
 	taste_mult = 0 // oderless and tasteless
-	ph = 9.2//It's acutally a huge range and very dependant on the chemistry but ph is basically a made up var in it's implementation anyways
+	ph = 9.2//It's acutally a huge range and very dependant on the chemistry but ph is basically a made up var in its implementation anyways
 	chemical_flags = REAGENT_CAN_BE_SYNTHESIZED
 
 
@@ -1349,7 +1350,7 @@
 
 /datum/reagent/space_cleaner/ez_clean
 	name = "EZ Clean"
-	description = "A powerful, acidic cleaner sold by Waffle Co. Affects organic matter while leaving other objects unaffected."
+	description = "A powerful, acidic cleaner sold by Waffle Corp. Affects organic matter while leaving other objects unaffected."
 	metabolization_rate = 1.5 * REAGENTS_METABOLISM
 	taste_description = "acid"
 	penetrates_skin = VAPOR
@@ -2685,7 +2686,7 @@
 /datum/reagent/metalgen
 	name = "Metalgen"
 	data = list("material"=null)
-	description = "A purple metal morphic liquid, said to impose it's metallic properties on whatever it touches."
+	description = "A purple metal morphic liquid, said to impose its metallic properties on whatever it touches."
 	color = "#b000aa"
 	taste_mult = 0 // oderless and tasteless
 	chemical_flags = REAGENT_NO_RANDOM_RECIPE
@@ -2950,7 +2951,7 @@
 //This is intended to a be a scarce reagent to gate certain drugs and toxins with. Do not put in a synthesizer. Renewable sources of this reagent should be inefficient.
 /datum/reagent/lead
 	name = "Lead"
-	description = "A dull metalltic element with a low melting point."
+	description = "A dull metallic element with a low melting point."
 	taste_description = "metal"
 	reagent_state = SOLID
 	color = "#80919d"

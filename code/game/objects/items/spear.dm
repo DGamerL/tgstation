@@ -12,10 +12,10 @@
 	throwforce = 20
 	throw_speed = 4
 	demolition_mod = 0.75
-	embedding = list("impact_pain_mult" = 2, "remove_pain_mult" = 4, "jostle_chance" = 2.5)
+	embed_type = /datum/embed_data/spear
 	armour_penetration = 10
 	custom_materials = list(/datum/material/iron = HALF_SHEET_MATERIAL_AMOUNT, /datum/material/glass= HALF_SHEET_MATERIAL_AMOUNT * 2)
-	hitsound = 'sound/weapons/bladeslice.ogg'
+	hitsound = 'sound/items/weapons/bladeslice.ogg'
 	attack_verb_continuous = list("attacks", "pokes", "jabs", "tears", "lacerates", "gores")
 	attack_verb_simple = list("attack", "poke", "jab", "tear", "lacerate", "gore")
 	sharpness = SHARP_EDGED // i know the whole point of spears is that they're pointy, but edged is more devastating at the moment so
@@ -31,6 +31,11 @@
 	var/force_unwielded = 10
 	/// How much damage to do wielded
 	var/force_wielded = 18
+
+/datum/embed_data/spear
+	impact_pain_mult = 2
+	remove_pain_mult = 4
+	jostle_chance = 2.5
 
 /datum/armor/item_spear
 	fire = 50
@@ -172,10 +177,8 @@
 		return
 	if(target.resistance_flags & INDESTRUCTIBLE) //due to the lich incident of 2021, embedding grenades inside of indestructible structures is forbidden
 		return
-	if(ismob(target))
-		var/mob/mob_target = target
-		if(mob_target.status_flags & GODMODE) //no embedding grenade phylacteries inside of ghost poly either
-			return
+	if(HAS_TRAIT(target, TRAIT_GODMODE))
+		return
 	if(iseffect(target)) //and no accidentally wasting your moment of glory on graffiti
 		return
 	user.say("[war_cry]", forced="spear warcry")
@@ -216,7 +219,7 @@
 	icon_state = "military_spear0"
 	base_icon_state = "military_spear0"
 	icon_prefix = "military_spear"
-	name = "military Javelin"
+	name = "military javelin"
 	desc = "A stick with a seemingly blunt spearhead on its end. Looks like it might break bones easily."
 	attack_verb_continuous = list("attacks", "pokes", "jabs")
 	attack_verb_simple = list("attack", "poke", "jab")

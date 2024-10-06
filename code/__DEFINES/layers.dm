@@ -32,6 +32,7 @@
 
 #define DEFAULT_PLANE 0 //Marks out the default plane, even if we don't use it
 
+#define WEATHER_PLANE 1
 #define AREA_PLANE 2
 #define MASSIVE_OBJ_PLANE 3
 #define GHOST_PLANE 4
@@ -64,6 +65,8 @@
 
 ///Things that should render ignoring lighting
 #define ABOVE_LIGHTING_PLANE 17
+
+#define WEATHER_GLOW_PLANE 18
 
 ///---------------- MISC -----------------------
 
@@ -119,11 +122,6 @@
 /// Try and keep this to a nice whole number, so it's easy to look at a plane var and know what's going on
 #define PLANE_RANGE (HIGHEST_EVER_PLANE - LOWEST_EVER_PLANE)
 
-// Layer helper macros
-
-/// Gives us a way to hook into topdown layers so we can make stupid DUMBASS MAP EDITOR RENDERING happy
-#define MARK_TOPDOWN(layer, FLOOR, NORMALIZED, MAX) MAP_SWITCH(layer, ( ( (NORMALIZED) - (FLOOR) ) * ( ( (layer) - TOPDOWN_LAYER ) / (MAX) ) ) + (FLOOR))
-
 // PLANE_SPACE layer(s)
 #define SPACE_LAYER 1.8
 
@@ -137,30 +135,27 @@
 // this allows larger then bound floors to layer as we'd expect
 // ANYTHING on the floor plane needs TOPDOWN_LAYER, and nothing that isn't on the floor plane can have it
 
-/// Max floor plane layer value (ignoring topdown)
-#define MAX_FLOOR_LAYER 13
-/// The minimum layer floor plane should have normalized to match up with its position in the plane stack
-#define MAPPING_FLOOR_LAYER_NORMALIZED_MIN 1.81
-/// The max layer floor plane should have normalized to match up with its position in the plane stack
-#define MAPPING_FLOOR_LAYER_NORMALIZED_MAX 2
-#define MARK_FLOOR_LAYER(layer) MARK_TOPDOWN(layer, MAPPING_FLOOR_LAYER_NORMALIZED_MIN, MAPPING_FLOOR_LAYER_NORMALIZED_MAX, MAX_FLOOR_LAYER)
-
 // NOTICE: we break from the pattern of increasing in steps of like 0.01 here
 // Because TOPDOWN_LAYER is 10000 and that's enough to floating point our modifications away
-#define LOW_FLOOR_LAYER MARK_FLOOR_LAYER(1 + TOPDOWN_LAYER)
-#define TURF_PLATING_DECAL_LAYER MARK_FLOOR_LAYER(2 + TOPDOWN_LAYER)
-#define TURF_DECAL_LAYER MARK_FLOOR_LAYER(3 + TOPDOWN_LAYER) //Makes turf decals appear in DM how they will look inworld.
-#define CULT_OVERLAY_LAYER MARK_FLOOR_LAYER(4 + TOPDOWN_LAYER)
-#define MID_TURF_LAYER MARK_FLOOR_LAYER(5 + TOPDOWN_LAYER)
-#define HIGH_TURF_LAYER MARK_FLOOR_LAYER(6 + TOPDOWN_LAYER)
-#define LATTICE_LAYER MARK_FLOOR_LAYER(7 + TOPDOWN_LAYER)
-#define DISPOSAL_PIPE_LAYER MARK_FLOOR_LAYER(8 + TOPDOWN_LAYER)
-#define WIRE_LAYER MARK_FLOOR_LAYER(9 + TOPDOWN_LAYER)
-#define GLASS_FLOOR_LAYER MARK_FLOOR_LAYER(10 + TOPDOWN_LAYER)
-#define TRAM_RAIL_LAYER MARK_FLOOR_LAYER(11 + TOPDOWN_LAYER)
+#define LOW_FLOOR_LAYER (1 + TOPDOWN_LAYER)
+#define TURF_PLATING_DECAL_LAYER (2 + TOPDOWN_LAYER)
+#define TURF_DECAL_LAYER (3 + TOPDOWN_LAYER) //Makes turf decals appear in DM how they will look inworld.
+#define CULT_OVERLAY_LAYER (4 + TOPDOWN_LAYER)
+#define MID_TURF_LAYER (5 + TOPDOWN_LAYER)
+#define HIGH_TURF_LAYER (6 + TOPDOWN_LAYER)
+#define LATTICE_LAYER (7 + TOPDOWN_LAYER)
+#define DISPOSAL_PIPE_LAYER (8 + TOPDOWN_LAYER)
+#define WIRE_LAYER (9 + TOPDOWN_LAYER)
+#define GLASS_FLOOR_LAYER (10 + TOPDOWN_LAYER)
+#define TRAM_RAIL_LAYER (11 + TOPDOWN_LAYER)
+#define ABOVE_OPEN_TURF_LAYER (12 + TOPDOWN_LAYER)
 ///catwalk overlay of /turf/open/floor/plating/catwalk_floor
-#define CATWALK_LAYER MARK_FLOOR_LAYER(12 + TOPDOWN_LAYER)
-#define ABOVE_OPEN_TURF_LAYER MARK_FLOOR_LAYER(13 + TOPDOWN_LAYER)
+#define CATWALK_LAYER (13 + TOPDOWN_LAYER)
+#define LOWER_RUNE_LAYER (14 + TOPDOWN_LAYER)
+#define RUNE_LAYER (15 + TOPDOWN_LAYER)
+/// [GAME_CLEAN_LAYER] but for floors.
+/// Basically any layer below this (numerically) is "on" a floor for the purposes of washing
+#define FLOOR_CLEAN_LAYER (20 + TOPDOWN_LAYER)
 
 //WALL_PLANE layers
 #define BELOW_CLOSED_TURF_LAYER 2.053
@@ -179,12 +174,10 @@
 #define PLUMBING_PIPE_VISIBILE_LAYER 2.495//layer = initial(layer) + ducting_layer / 3333 in atmospherics/handle_layer() to determine order of duct overlap
 #define BOT_PATH_LAYER 2.497
 #define LOW_OBJ_LAYER 2.5
-#define LOW_SIGIL_LAYER 2.52
-#define SIGIL_LAYER 2.53
 #define HIGH_PIPE_LAYER 2.54
 // Anything above this layer is not "on" a turf for the purposes of washing
 // I hate this life of ours
-#define FLOOR_CLEAN_LAYER 2.55
+#define GAME_CLEAN_LAYER 2.55
 #define TRAM_STRUCTURE_LAYER 2.57
 #define TRAM_FLOOR_LAYER 2.58
 #define TRAM_WALL_LAYER 2.59
@@ -266,7 +259,7 @@
 
 //---------- EMISSIVES -------------
 //Layering order of these is not particularly meaningful.
-//Important part is the seperation of the planes for control via plane_master
+//Important part is the separation of the planes for control via plane_master
 
 /// The layer you should use if you _really_ don't want an emissive overlay to be blocked.
 #define EMISSIVE_LAYER_UNBLOCKABLE 9999
@@ -331,6 +324,15 @@
 #define PLANE_CRITICAL_CUT_RENDER (1<<2)
 
 #define PLANE_CRITICAL_FUCKO_PARALLAX (PLANE_CRITICAL_DISPLAY|PLANE_CRITICAL_NO_RELAY|PLANE_CRITICAL_CUT_RENDER)
+
+//---------- Plane Master offsetting_flags -------------
+// Describes how different plane masters behave regarding being offset
+/// This plane master will not be offset itself, existing only once with an offset of 0
+/// Mostly used for planes that really don't need to be duplicated, like the hud planes
+#define BLOCKS_PLANE_OFFSETTING (1<<0)
+/// This plane master will have its relays offset to match the highest rendering plane that matches the target
+/// Required for making things like the blind fullscreen not render over runechat
+#define OFFSET_RELAYS_MATCH_HIGHEST (1<<1)
 
 /// A value of /datum/preference/numeric/multiz_performance that disables the option
 #define MULTIZ_PERFORMANCE_DISABLE -1

@@ -42,6 +42,13 @@
 		"pneumatic_seal",
 	)
 	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = TECHWEB_TIER_1_POINTS)
+	experiments_to_unlock = list(
+		/datum/experiment/ordnance/gaseous/plasma,
+		/datum/experiment/ordnance/gaseous/nitrous_oxide,
+		/datum/experiment/ordnance/gaseous/bz,
+		/datum/experiment/ordnance/gaseous/noblium,
+	)
+	announce_channels = list(RADIO_CHANNEL_ENGINEERING)
 
 /datum/techweb_node/plasma_control
 	id = TECHWEB_NODE_PLASMA_CONTROL
@@ -49,7 +56,6 @@
 	description = "Experiments with high-pressure gases and electricity resulting in crystallization and controlled plasma reactions."
 	prereq_ids = list(TECHWEB_NODE_GAS_COMPRESSION, TECHWEB_NODE_ENERGY_MANIPULATION)
 	design_ids = list(
-		"crystallizer",
 		"electrolyzer",
 		"pipe_scrubber",
 		"pacman",
@@ -58,6 +64,7 @@
 	)
 	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = TECHWEB_TIER_2_POINTS)
 	required_experiments = list(/datum/experiment/ordnance/gaseous/plasma)
+	announce_channels = list(RADIO_CHANNEL_ENGINEERING)
 
 /datum/techweb_node/fusion
 	id = TECHWEB_NODE_FUSION
@@ -75,10 +82,11 @@
 		"bolter_wrench",
 		"rpd_loaded",
 		"engine_goggles",
+		"crystallizer",
 	)
 	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = TECHWEB_TIER_3_POINTS)
-	required_experiments = list(/datum/experiment/ordnance/gaseous/bz)
 	discount_experiments = list(/datum/experiment/ordnance/gaseous/nitrous_oxide = TECHWEB_TIER_3_POINTS)
+	announce_channels = list(RADIO_CHANNEL_ENGINEERING)
 
 /datum/techweb_node/exp_tools
 	id = TECHWEB_NODE_EXP_TOOLS
@@ -99,7 +107,8 @@
 		"magboots",
 	)
 	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = TECHWEB_TIER_4_POINTS)
-	discount_experiments = list(/datum/experiment/ordnance/gaseous/noblium = TECHWEB_TIER_4_POINTS)
+	discount_experiments = list(/datum/experiment/ordnance/gaseous/bz = TECHWEB_TIER_4_POINTS)
+	announce_channels = list(RADIO_CHANNEL_ENGINEERING)
 
 /datum/techweb_node/rcd_upgrade
 	id = TECHWEB_NODE_RCD_UPGRADE
@@ -116,3 +125,5 @@
 		"rpd_upgrade_unwrench",
 	)
 	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = TECHWEB_TIER_5_POINTS)
+	discount_experiments = list(/datum/experiment/ordnance/gaseous/noblium = TECHWEB_TIER_5_POINTS)
+	announce_channels = list(RADIO_CHANNEL_ENGINEERING)

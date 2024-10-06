@@ -115,13 +115,15 @@
 				var/obj/loc_as_obj = loc
 				loc_as_obj.handle_internal_lifeform(src,0)
 
-	try_breathing_sound(is_on_internals, breath)
+	if(check_breath(breath) && is_on_internals)
+		try_breathing_sound(breath)
+
 	if(breath)
 		loc.assume_air(breath)
 
 //Tries to play the carbon a breathing sound when using internals, also invokes check_breath
-/mob/living/carbon/proc/try_breathing_sound(internals, breath)
-	var/should_be_on = internals && check_breath(breath) && canon_client?.prefs?.read_preference(/datum/preference/toggle/sound_breathing)
+/mob/living/carbon/proc/try_breathing_sound(breath)
+	var/should_be_on =  canon_client?.prefs?.read_preference(/datum/preference/toggle/sound_breathing)
 	if(should_be_on && !breathing_loop.timer_id)
 		breathing_loop.start()
 	else if(!should_be_on && breathing_loop.timer_id)
@@ -145,7 +147,7 @@
 /mob/living/carbon/proc/check_breath(datum/gas_mixture/breath)
 	. = TRUE
 
-	if(status_flags & GODMODE)
+	if(HAS_TRAIT(src, TRAIT_GODMODE))
 		failed_last_breath = FALSE
 		clear_alert(ALERT_NOT_ENOUGH_OXYGEN)
 		return
@@ -663,6 +665,8 @@
  * * capped (optional) default True used to cap step mode
  */
 /mob/living/carbon/adjust_bodytemperature(amount, min_temp=0, max_temp=INFINITY, use_insulation=FALSE, use_steps=FALSE, capped=TRUE)
+	if(HAS_TRAIT(src, TRAIT_HYPOTHERMIC) && amount > 0) //Prevent warming up
+		return
 	// apply insulation to the amount of change
 	if(use_insulation)
 		amount *= (1 - get_insulation_protection(bodytemperature + amount))
